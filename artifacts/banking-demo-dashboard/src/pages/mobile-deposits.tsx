@@ -169,7 +169,7 @@ async function uploadImage(uploadURL: string, file: File) {
     method: "PUT",
     headers: { "Content-Type": file.type },
     body: file,
-    credentials: "omit",
+    credentials: uploadURL.startsWith("/") ? "include" : "omit",
   });
   if (!response.ok) {
     throw new Error("The check image could not be uploaded. Please try again.");

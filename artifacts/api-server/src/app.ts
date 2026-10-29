@@ -1,4 +1,5 @@
 import express, { type Express } from "express";
+import path from "node:path";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import { clerkMiddleware } from "@clerk/express";
@@ -47,5 +48,21 @@ app.use(
 );
 
 app.use("/api", router);
+
+if (process.env.SERVE_WEB_APP === "true") {
+  const webRoot = path.resolve(
+    process.cwd(),
+    "artifacts/banking-demo-dashboard/dist/public",
+  );
+  app.use(express.static(webRoot, { index: false, fallthrough: true }));
+  app.get("/{*splat}", (req, res, next) => {
+    if (req.path === "/api" || req.path.startsWith("/api/")) {
+      next();
+      return;
+    }
+    res.setHeader("Cache-Control", "no-cache");
+    res.sendFile(path.join(webRoot, "index.html"));
+  });
+}
 
 export default app;

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { and, desc, eq } from "drizzle-orm";
 import { clerkClient, getAuth } from "@clerk/express";
-import { Router, type IRouter, type Request, type Response } from "express";
+import express, { Router, type IRouter, type Request, type Response } from "express";
 import {
   CreateDemoDepositDraftBody,
   DeleteDemoDepositParams,
@@ -26,6 +26,14 @@ import {
   ObjectNotFoundError,
   ObjectStorageService,
 } from "../lib/objectStorage";
+import {
+  createLocalCheckObjectPath,
+  deleteLocalCheckImage,
+  matchesCheckImageSignature,
+  readLocalCheckImage,
+  usesLocalCheckStorage,
+  writeLocalCheckImage,
+} from "../lib/localCheckStorage";
 
 const router: IRouter = Router();
 const storage = new ObjectStorageService();
@@ -111,6 +119,28 @@ async function validateImage(
   expectedContentType: string,
   expectedSize: number,
 ) {
+  if (usesLocalCheckStorage()) {
+    let data: Buffer;
+    try {
+      data = await readLocalCheckImage(objectPath);
+    } catch (error) {
+      if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+        throw new ObjectNotFoundError();
+      }
+      throw error;
+    }
+    if (
+      !acceptedImageTypes.has(expectedContentType) ||
+      data.length !== expectedSize ||
+      data.length <= 0 ||
+      data.length > maxImageBytes ||
+      !matchesCheckImageSignature(expectedContentType, data)
+    ) {
+      throw new Error("INVALID_CHECK_IMAGE");
+    }
+    return;
+  }
+
   const file = await storage.getObjectEntityFile(objectPath);
   const [metadata] = await file.getMetadata();
   const actualSize = Number(metadata.size);
@@ -128,6 +158,10 @@ async function validateImage(
 }
 
 async function deleteObjectIfPresent(objectPath: string): Promise<void> {
+  if (usesLocalCheckStorage()) {
+    await deleteLocalCheckImage(objectPath);
+    return;
+  }
   try {
     const file = await storage.getObjectEntityFile(objectPath);
     await file.delete({ ignoreNotFound: true });
@@ -183,12 +217,19 @@ router.post("/demo/deposits/drafts", async (req, res): Promise<void> => {
       return;
     }
 
-    const [frontUrl, backUrl] = await Promise.all([
-      storage.getObjectEntityUploadURL(),
-      storage.getObjectEntityUploadURL(),
-    ]);
-    const frontObjectPath = storage.normalizeObjectEntityPath(frontUrl);
-    const backObjectPath = storage.normalizeObjectEntityPath(backUrl);
+    const localStorage = usesLocalCheckStorage();
+    const [frontUrl, backUrl] = localStorage
+      ? [null, null]
+      : await Promise.all([
+          storage.getObjectEntityUploadURL(),
+          storage.getObjectEntityUploadURL(),
+        ]);
+    const frontObjectPath = localStorage
+      ? createLocalCheckObjectPath()
+      : storage.normalizeObjectEntityPath(frontUrl!);
+    const backObjectPath = localStorage
+      ? createLocalCheckObjectPath()
+      : storage.normalizeObjectEntityPath(backUrl!);
     const [deposit] = await db
       .insert(demoDepositsTable)
       .values({
@@ -208,8 +249,18 @@ router.post("/demo/deposits/drafts", async (req, res): Promise<void> => {
 
     res.status(201).json({
       depositId: deposit.id,
-      front: { uploadURL: frontUrl, objectPath: frontObjectPath },
-      back: { uploadURL: backUrl, objectPath: backObjectPath },
+      front: {
+        uploadURL: localStorage
+          ? `/api/demo/deposits/${deposit.id}/images/front`
+          : frontUrl,
+        objectPath: frontObjectPath,
+      },
+      back: {
+        uploadURL: localStorage
+          ? `/api/demo/deposits/${deposit.id}/images/back`
+          : backUrl,
+        objectPath: backObjectPath,
+      },
     });
   } catch {
     res.status(503).json({ error: "Private check image storage is unavailable." });
@@ -260,16 +311,18 @@ router.post(
           deposit.backSize,
         ),
       ]);
-      await Promise.all([
-        storage.trySetObjectEntityAclPolicy(deposit.frontObjectPath, {
-          owner: ownerUserId,
-          visibility: "private",
-        }),
-        storage.trySetObjectEntityAclPolicy(deposit.backObjectPath, {
-          owner: ownerUserId,
-          visibility: "private",
-        }),
-      ]);
+      if (!usesLocalCheckStorage()) {
+        await Promise.all([
+          storage.trySetObjectEntityAclPolicy(deposit.frontObjectPath, {
+            owner: ownerUserId,
+            visibility: "private",
+          }),
+          storage.trySetObjectEntityAclPolicy(deposit.backObjectPath, {
+            owner: ownerUserId,
+            visibility: "private",
+          }),
+        ]);
+      }
 
       const [updated] = await db
         .update(demoDepositsTable)
@@ -412,6 +465,18 @@ router.get(
         params.data.side === "front"
           ? deposit.frontObjectPath
           : deposit.backObjectPath;
+      if (usesLocalCheckStorage()) {
+        const image = await readLocalCheckImage(objectPath);
+        const contentType =
+          params.data.side === "front"
+            ? deposit.frontContentType
+            : deposit.backContentType;
+        res.setHeader("Content-Type", contentType);
+        res.setHeader("Content-Length", image.length);
+        res.setHeader("Cache-Control", "private, no-store");
+        res.status(200).send(image);
+        return;
+      }
       const file = await storage.getObjectEntityFile(objectPath);
       const response = await storage.downloadObject(file, 0);
       res.status(response.status);
@@ -427,6 +492,70 @@ router.get(
       }
     } catch {
       res.status(404).json({ error: "Deposit image not found." });
+    }
+  },
+);
+
+router.put(
+  "/demo/deposits/:depositId/images/:side",
+  express.raw({ type: [...acceptedImageTypes], limit: maxImageBytes }),
+  async (req, res): Promise<void> => {
+    if (!usesLocalCheckStorage()) {
+      res.status(404).json({ error: "Upload route not available." });
+      return;
+    }
+    const access = await requireApprovedCustomer(req, res);
+    if (!access) return;
+    const params = GetDemoDepositImageParams.safeParse(req.params);
+    if (!params.success || !Buffer.isBuffer(req.body)) {
+      res.status(400).json({ error: "Invalid check image upload." });
+      return;
+    }
+    const [deposit] = await db
+      .select()
+      .from(demoDepositsTable)
+      .where(
+        and(
+          eq(demoDepositsTable.id, params.data.depositId),
+          eq(demoDepositsTable.ownerUserId, access.ownerUserId),
+          eq(demoDepositsTable.status, "draft"),
+        ),
+      )
+      .limit(1);
+    if (!deposit) {
+      res.status(404).json({ error: "Deposit draft not found." });
+      return;
+    }
+
+    const contentType = req.get("content-type")?.split(";")[0].trim().toLowerCase();
+    const expectedContentType =
+      params.data.side === "front"
+        ? deposit.frontContentType
+        : deposit.backContentType;
+    const expectedSize =
+      params.data.side === "front" ? deposit.frontSize : deposit.backSize;
+    if (
+      !contentType ||
+      !acceptedImageTypes.has(contentType) ||
+      contentType !== expectedContentType ||
+      req.body.length !== expectedSize ||
+      req.body.length <= 0 ||
+      req.body.length > maxImageBytes ||
+      !matchesCheckImageSignature(contentType, req.body)
+    ) {
+      res.status(400).json({ error: "The check image does not match the draft." });
+      return;
+    }
+
+    const objectPath =
+      params.data.side === "front"
+        ? deposit.frontObjectPath
+        : deposit.backObjectPath;
+    try {
+      await writeLocalCheckImage(objectPath, req.body);
+      res.status(204).end();
+    } catch {
+      res.status(503).json({ error: "Private check image storage is unavailable." });
     }
   },
 );
