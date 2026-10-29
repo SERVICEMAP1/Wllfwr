@@ -2,3 +2,5 @@
 - [Authentication provider](auth-provider.md) — use Clerk for customer sign-in; do not substitute another provider without asking.
 - [Internal ledger boundaries](ledger-boundaries.md) — manual check approval posts to Cedarline’s internal ledger; it does not mean bank settlement.
 - [Identity data boundary](identity-data-boundaries.md) — do not collect or store raw SSNs; use secure identity verification if it becomes necessary.
+- [Opening balances](opening-balances.md) — preserve the existing seeded account balances as opening balances during migration.
+- [Render test deployment](render-test-deployment.md) — use Render’s free plan for temporary testing only; its database and local check-image files are not durable.
