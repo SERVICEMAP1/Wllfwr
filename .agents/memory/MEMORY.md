@@ -1,0 +1,4 @@
+- [Visual reference and brand boundaries](visual-reference.md) — Wells Fargo is the visible name; keep the app explicitly independent and unaffiliated.
+- [Authentication provider](auth-provider.md) — use Clerk for customer sign-in; do not substitute another provider without asking.
+- [Internal ledger boundaries](ledger-boundaries.md) — manual check approval posts to Cedarline’s internal ledger; it does not mean bank settlement.
+- [Identity data boundary](identity-data-boundaries.md) — do not collect or store raw SSNs; use secure identity verification if it becomes necessary.

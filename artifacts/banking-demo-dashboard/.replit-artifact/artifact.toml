@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Wells Fargo"
+description = "Independent internal account-ledger application. Not affiliated with Wells Fargo or any financial institution; balances are not bank deposits."
+version = "1.0.0"
+id = "artifacts/banking-demo-dashboard"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25559
+
+[services.development]
+run = "pnpm --filter @workspace/banking-demo-dashboard run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/banking-demo-dashboard", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/banking-demo-dashboard/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25559"
+BASE_PATH = "/"

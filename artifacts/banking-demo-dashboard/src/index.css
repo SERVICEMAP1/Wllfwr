@@ -1,0 +1,415 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@layer theme, base, clerk, components, utilities;
+@import 'tailwindcss';
+@import '@clerk/themes/shadcn.css';
+@import 'tw-animate-css';
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
+  --font-mono: var(--app-font-mono);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --background: 20 18% 97%;
+  --foreground: 0 0% 8%;
+  --border: 39 22% 85%;
+  --input: 39 22% 85%;
+  --card: 30 25% 98%;
+  --card-foreground: 0 0% 8%;
+  --primary: 357 75% 48%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 42 32% 90%;
+  --secondary-foreground: 12 9% 21%;
+  --muted: 42 24% 91%;
+  --muted-foreground: 18 9% 45%;
+  --accent: 45 100% 63%;
+  --accent-foreground: 0 0% 8%;
+  --destructive: 357 75% 48%;
+  --destructive-foreground: 45 40% 98%;
+  --ring: 357 75% 48%;
+  --chart-1: 357 75% 48%;
+  --chart-2: 45 100% 63%;
+  --chart-3: 19 24% 52%;
+  --chart-4: 10 40% 62%;
+  --chart-5: 35 28% 54%;
+  --sidebar: 12 9% 21%;
+  --sidebar-foreground: 20 18% 97%;
+  --sidebar-border: 12 7% 31%;
+  --sidebar-primary: 45 100% 63%;
+  --sidebar-primary-foreground: 0 0% 8%;
+  --sidebar-accent: 12 8% 30%;
+  --sidebar-accent-foreground: 20 18% 97%;
+  --sidebar-ring: 45 100% 63%;
+  --popover: 45 40% 99%;
+  --popover-foreground: 0 0% 8%;
+  --app-font-sans: 'DM Sans', sans-serif;
+  --app-font-serif: 'Manrope', sans-serif;
+  --app-font-mono: 'SFMono-Regular', Consolas, monospace;
+  --radius: 0.9rem;
+}
+
+.dark {
+  --background: 12 13% 13%;
+  --foreground: 42 25% 93%;
+  --border: 16 12% 29%;
+  --input: 16 12% 29%;
+  --card: 10 13% 17%;
+  --card-foreground: 42 25% 93%;
+  --primary: 45 100% 63%;
+  --primary-foreground: 0 0% 8%;
+  --secondary: 12 13% 25%;
+  --secondary-foreground: 42 25% 93%;
+  --muted: 12 13% 25%;
+  --muted-foreground: 42 12% 67%;
+  --accent: 12 13% 28%;
+  --accent-foreground: 42 25% 93%;
+  --destructive: 5 53% 55%;
+  --destructive-foreground: 45 40% 98%;
+  --ring: 42 62% 72%;
+  --sidebar: 12 9% 14%;
+  --sidebar-foreground: 42 25% 93%;
+  --sidebar-border: 357 25% 23%;
+  --sidebar-primary: 42 62% 72%;
+  --sidebar-primary-foreground: 0 0% 8%;
+  --sidebar-accent: 357 25% 20%;
+  --sidebar-accent-foreground: 42 25% 93%;
+  --sidebar-ring: 42 62% 72%;
+  --popover: 12 10% 17%;
+  --popover-foreground: 42 25% 93%;
+}
+
+@layer base {
+  * { @apply border-border; }
+  body { @apply font-sans antialiased bg-background text-foreground; margin: 0; }
+  button, input, select { font: inherit; }
+}
+
+/* Cedarline's own red-and-brass retail banking identity */
+[class*="bg-[#183d30]"] { background-color: #3b3331 !important; }
+[class*="bg-[#244f3c]"] { background-color: #d71e28 !important; }
+[class*="bg-[#244a39]"] { background-color: #514542 !important; }
+[class*="bg-[#2a5342]"] { background-color: #d71e28 !important; }
+[class*="bg-[#214735]"] { background-color: #514542 !important; }
+[class*="bg-[#315e48]"] { background-color: #d71e28 !important; }
+[class*="bg-[#203f30]"] { background-color: #3b3331 !important; }
+[class*="bg-[#1c422f]"] { background-color: #b01821 !important; }
+[class*="bg-[#16291f]"] { background-color: #3b3331 !important; }
+[class*="bg-[#13291f]"] { background-color: #3b3331 !important; }
+
+[class*="text-[#183d30]"],
+[class*="text-[#20382e]"],
+[class*="text-[#213e30]"],
+[class*="text-[#244333]"],
+[class*="text-[#294437]"],
+[class*="text-[#30473b]"],
+[class*="text-[#34483c]"],
+[class*="text-[#385448]"],
+[class*="text-[#396149]"],
+[class*="text-[#3c694f]"],
+[class*="text-[#3e4c3c]"],
+[class*="text-[#405246]"],
+[class*="text-[#43594a]"],
+[class*="text-[#456052]"],
+[class*="text-[#45664e]"],
+[class*="text-[#465a48]"],
+[class*="text-[#466650]"],
+[class*="text-[#4c7055]"],
+[class*="text-[#4d5e4f]"],
+[class*="text-[#4d7153]"],
+[class*="text-[#52644e]"],
+[class*="text-[#52665b]"],
+[class*="text-[#52675b]"],
+[class*="text-[#53715a]"],
+[class*="text-[#54705c]"],
+[class*="text-[#62806c]"],
+[class*="text-[#638263]"],
+[class*="text-[#66856c]"],
+[class*="text-[#698071]"],
+  [class*="text-[#77917d]"] { color: #d71e28 !important; }
+
+[class*="text-[#c5d2c8]"],
+[class*="text-[#b6c4b8]"],
+[class*="text-[#b8c9bc]"],
+[class*="text-[#b9cdbd]"],
+[class*="text-[#bfd0c0]"],
+[class*="text-[#c3d2c5]"],
+[class*="text-[#d4dfd3]"],
+[class*="text-[#d8e1d7]"],
+[class*="text-[#dce5dc]"],
+[class*="text-[#e6ebdf]"] { color: #f3e8d3 !important; }
+
+[class*="bg-[#e6eee4]"],
+[class*="bg-[#e9eddf]"],
+[class*="bg-[#eef0e8]"],
+[class*="bg-[#e9e9df]"] { background-color: #f1e5ce !important; }
+[class*="text-[#4d7153]"],
+[class*="text-[#53715a]"],
+[class*="text-[#54705c]"],
+[class*="text-[#62806c]"] { color: #d71e28 !important; }
+[class*="border-[#355442]"] { border-color: #a85c5d !important; }
+[class*="border-[#3a624e]"] { border-color: #a85c5d !important; }
+[class*="border-[#77917d]"] { border-color: #d71e28 !important; }
+[class*="border-[#c9bea3]"] { border-color: #c8ad72 !important; }
+
+html { scroll-behavior: smooth; }
+button { cursor: pointer; }
+.font-display { font-family: var(--app-font-serif); }
+.page-enter { animation: enter .45s both; }
+@keyframes enter { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+::selection { background: #c5d5c7; color: #173c2e; }
+
+.cedar-nav-link {
+  color: #3b3331;
+  font-size: 12px;
+  font-weight: 600;
+  transition: color .16s ease;
+}
+.cedar-nav-link:hover { color: #d71e28; }
+.cedar-eyebrow {
+  color: #a31921;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+.cedar-home-pattern {
+  background:
+    radial-gradient(ellipse at 82% 20%, rgba(255, 205, 65, .23), transparent 33%),
+    radial-gradient(ellipse at 76% 82%, rgba(215, 30, 40, .055), transparent 28%),
+    linear-gradient(135deg, #fcfaf8 0%, #f9f7f6 52%, #f3ebe6 100%);
+}
+
+/* Public Cedarline retail-bank homepage */
+.cedar-retail { --retail-red: #d71e28; --retail-gold: #ffcd41; --retail-brown: #3b3331; --retail-warm: #f9f7f6; }
+.cedar-masthead { background: var(--retail-red); border-bottom: 4px solid var(--retail-gold); color: #fffaf4; }
+.cedar-masthead-inner { max-width: 1440px; height: 82px; padding: 0 32px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.cedar-retail-brand { display: inline-flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
+.cedar-brand-mark { display: grid; width: 43px; height: 43px; place-items: center; border: 1px solid rgba(255,255,255,.58); border-radius: 50%; color: var(--retail-gold); font-family: var(--app-font-serif); font-size: 24px; font-weight: 800; }
+.cedar-brand-type strong { display: block; font-family: var(--app-font-serif); font-size: 23px; line-height: 1; letter-spacing: -.055em; }
+.cedar-brand-type small { display: block; margin-top: 5px; color: #ffe6d9; font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.cedar-utility { display: flex; align-items: center; gap: clamp(14px, 2vw, 30px); font-size: 11px; font-weight: 600; }
+.cedar-utility a, .cedar-utility button { display: inline-flex; align-items: center; gap: 7px; color: #fff8f0; text-decoration: none; transition: opacity .18s; }
+.cedar-utility button { padding: 0; border: 0; background: transparent; font-size: 11px; font-weight: 600; }
+.cedar-utility a:hover, .cedar-utility button:hover { opacity: .74; }
+.cedar-utility a:last-child { padding: 11px 15px; border: 1px solid rgba(255,255,255,.48); border-radius: 3px; }
+.cedar-mobile-menu-trigger { display: none; }
+.cedar-product-nav { position: relative; z-index: 30; background: #fffdfa; border-bottom: 1px solid #e7dfd9; box-shadow: 0 3px 12px rgba(59,51,49,.045); }
+.cedar-product-scroll { display: flex; max-width: 1440px; min-height: 54px; align-items: stretch; gap: 0; margin: 0 auto; padding: 0 22px; overflow-x: auto; scrollbar-width: thin; }
+.cedar-product-scroll a, .cedar-product-scroll button { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 6px; padding: 0 11px; border: 0; background: transparent; color: #514744; font-size: 11px; font-weight: 650; text-decoration: none; transition: color .18s, background .18s; }
+.cedar-product-scroll a:hover, .cedar-product-scroll button:hover, .cedar-product-scroll button[aria-expanded="true"] { background: #f6efeb; color: var(--retail-red); }
+.cedar-product-scroll button:focus-visible, .cedar-utility a:focus-visible, .cedar-utility button:focus-visible, .cedar-mobile-menu-trigger:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.cedar-product-scroll button:focus-visible { outline-color: #6d161d; }
+.cedar-retail-header { position: relative; z-index: 35; }
+.cedar-mega-menu { position: absolute; top: 100%; left: 0; right: 0; display: grid; grid-template-columns: minmax(220px,.8fr) minmax(320px,1.2fr); gap: 42px; padding: 30px max(32px, calc((100vw - 1220px) / 2)); border-bottom: 3px solid var(--retail-gold); background: #fffdfa; box-shadow: 0 16px 28px rgba(45,35,31,.17); }
+.cedar-mega-intro h2 { margin: 9px 0; font-family: var(--app-font-serif); font-size: 25px; letter-spacing: -.04em; }
+.cedar-mega-intro > p:last-child { max-width: 390px; margin: 0; color: #70645e; font-size: 11px; line-height: 1.65; }
+.cedar-mega-links { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; align-content: center; }
+.cedar-mega-links a { display: flex; min-height: 68px; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; border: 1px solid #e8dfd8; color: var(--retail-brown); font-size: 11px; font-weight: 700; text-decoration: none; transition: border-color .18s, background .18s; }
+.cedar-mega-links a svg { flex: 0 0 auto; color: var(--retail-red); }
+.cedar-mega-links a:hover { border-color: #d6b358; background: #fcf6e8; }
+.cedar-menu-close { position: absolute; top: 14px; right: 18px; display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid #e4dcd6; border-radius: 50%; background: #fff; color: var(--retail-brown); }
+.cedar-search-panel { position: absolute; top: 100%; right: max(22px, calc((100vw - 1320px) / 2)); z-index: 40; width: min(430px, calc(100vw - 32px)); padding: 20px; border: 1px solid #e3d9d2; border-top: 4px solid var(--retail-gold); background: #fffdfa; box-shadow: 0 16px 28px rgba(45,35,31,.17); }
+.cedar-search-panel > label { display: block; margin-bottom: 9px; font-size: 12px; font-weight: 800; }
+.cedar-search-field { display: flex; align-items: center; gap: 9px; padding: 0 12px; border: 1px solid #a99a90; background: #fff; color: #655b57; }
+.cedar-search-field:focus-within { outline: 2px solid #6d161d; outline-offset: 1px; }
+.cedar-search-field input { width: 100%; min-height: 42px; border: 0; outline: 0; color: #3b3331; font-size: 12px; }
+.cedar-search-results { display: grid; margin-top: 8px; }
+.cedar-search-results a { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 2px; border-bottom: 1px solid #eee7e2; color: #3b3331; font-size: 11px; text-decoration: none; }
+.cedar-search-results a:hover { color: var(--retail-red); }
+.cedar-search-results p, .cedar-search-note { color: #796e68; font-size: 10px; }
+.cedar-search-note { margin: 12px 0 0; }
+.cedar-demo-access { border-bottom: 1px solid #e3dcd6; background: #f5f2ef; }
+.cedar-access-inner { display: flex; max-width: 1340px; min-height: 112px; align-items: center; justify-content: space-between; gap: 35px; margin: 0 auto; padding: 17px 30px; }
+.cedar-access-inner h2 { margin: 5px 0 0; font-family: var(--app-font-serif); font-size: clamp(19px, 2vw, 24px); letter-spacing: -.04em; }
+.cedar-access-inner > div:first-child > p:last-child { margin: 7px 0 0; color: #6d625d; font-size: 11px; line-height: 1.6; }
+.cedar-access-action { display: flex; flex: 0 0 auto; flex-direction: column; align-items: flex-start; gap: 8px; }
+.cedar-access-action > span { display: inline-flex; align-items: center; gap: 6px; color: #6c5e50; font-size: 9px; font-weight: 650; }
+.cedar-access-action > span svg { color: #95601a; }
+.cedar-campaign { position: relative; min-height: 490px; overflow: hidden; background: #bcb7b1; }
+.cedar-campaign-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 47%; }
+.cedar-campaign-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(30,25,23,.77) 0%, rgba(30,25,23,.59) 31%, rgba(30,25,23,.08) 69%, rgba(30,25,23,0) 100%); }
+.cedar-campaign-copy { position: relative; z-index: 1; display: flex; min-height: 490px; max-width: 1440px; flex-direction: column; align-items: flex-start; justify-content: center; padding: 52px clamp(28px, 7.3vw, 112px); color: #fffaf5; }
+.cedar-campaign-copy > * { max-width: 500px; }
+.cedar-campaign-kicker { margin: 0 0 17px; color: #ffdb79; font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.cedar-campaign-copy h1 { margin: 0; font-family: var(--app-font-serif); font-size: clamp(40px, 5.3vw, 66px); font-weight: 750; line-height: 1.02; letter-spacing: -.055em; }
+.cedar-campaign-copy > p:not(.cedar-campaign-kicker) { margin: 19px 0 0; color: rgba(255,250,245,.91); font-size: 15px; line-height: 1.75; }
+.cedar-red-button, .cedar-outline-button { display: inline-flex; min-height: 46px; align-items: center; justify-content: center; gap: 11px; padding: 0 19px; border-radius: 3px; font-size: 12px; font-weight: 750; text-decoration: none; transition: background .18s, transform .18s; }
+.cedar-red-button { background: var(--retail-red); color: #fff; }
+.cedar-red-button:hover { background: #b91923; transform: translateY(-1px); }
+.cedar-outline-button { border: 1px solid rgba(255,255,255,.7); background: rgba(59,51,49,.15); color: #fff; }
+.cedar-outline-button:hover { background: rgba(255,255,255,.15); }
+.cedar-campaign-note { display: inline-flex; align-items: center; gap: 7px; margin-top: 22px; color: rgba(255,250,245,.88); font-size: 10px; font-weight: 600; }
+.cedar-campaign-note svg { color: var(--retail-gold); }
+.cedar-campaign-count { position: absolute; right: clamp(24px, 6vw, 90px); bottom: 24px; display: flex; align-items: center; gap: 10px; color: white; font-family: var(--app-font-mono); font-size: 10px; }
+.cedar-campaign-count i { width: 38px; height: 1px; background: var(--retail-gold); }
+.cedar-shortcuts { max-width: 1340px; margin: 0 auto; padding: 42px 30px 50px; }
+.cedar-section-kicker { margin-bottom: 20px; color: #8c7770; font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+.cedar-shortcut-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); border-top: 1px solid #e4dcd6; border-bottom: 1px solid #e4dcd6; }
+.cedar-shortcut { display: flex; min-height: 104px; align-items: center; gap: 13px; padding: 18px 17px; border-right: 1px solid #e4dcd6; color: var(--retail-brown); text-decoration: none; transition: background .18s; }
+.cedar-shortcut:first-child { border-left: 1px solid #e4dcd6; }
+.cedar-shortcut:hover { background: #fffdfa; }
+.cedar-shortcut-icon { display: grid; width: 41px; height: 41px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: #f3e7d4; color: #8d502e; }
+.cedar-shortcut-copy { flex: 1; }
+.cedar-shortcut-copy strong, .cedar-shortcut-copy small { display: block; }
+.cedar-shortcut-copy strong { font-family: var(--app-font-serif); font-size: 14px; }
+.cedar-shortcut-copy small { margin-top: 5px; color: #766a65; font-size: 10px; line-height: 1.45; }
+.cedar-shortcut-arrow { flex: 0 0 auto; color: var(--retail-red); }
+.cedar-feature-band { display: grid; grid-template-columns: 1fr 1fr; min-height: 360px; background: #eee7df; }
+.cedar-feature-photo { min-height: 310px; background: linear-gradient(135deg,rgba(59,51,49,.06),rgba(59,51,49,.13)), url('/cedarline-homepage-hero.jpg') center 63% / cover; }
+.cedar-feature-copy { align-self: center; max-width: 600px; padding: 50px clamp(32px, 7vw, 100px); }
+.cedar-eyebrow { margin: 0; color: #a31921; font-size: 10px; font-weight: 850; letter-spacing: .15em; text-transform: uppercase; }
+.cedar-feature-copy h2, .cedar-content-heading h2, .cedar-rate-heading h2, .cedar-guidance-intro h2, .cedar-community h2, .cedar-about h2 { margin: 12px 0 0; font-family: var(--app-font-serif); font-size: clamp(28px, 3.1vw, 39px); font-weight: 750; line-height: 1.1; letter-spacing: -.045em; }
+.cedar-feature-copy > p:not(.cedar-eyebrow), .cedar-guidance-intro > p:not(.cedar-eyebrow), .cedar-community > div > p:not(.cedar-eyebrow), .cedar-about-copy > p:not(.cedar-eyebrow) { color: #655b57; font-size: 12px; line-height: 1.8; }
+.cedar-feature-copy > p:not(.cedar-eyebrow) { margin: 16px 0 22px; }
+.cedar-text-link, .cedar-light-link, .cedar-dark-link { display: inline-flex; align-items: center; gap: 9px; font-size: 11px; font-weight: 800; text-decoration: none; }
+.cedar-text-link { color: #b41a24; }
+.cedar-text-link:hover, .cedar-light-link:hover, .cedar-dark-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+.cedar-offer-area { max-width: 1320px; margin: 0 auto; padding: 75px 30px 80px; }
+.cedar-content-heading { display: flex; align-items: end; justify-content: space-between; gap: 32px; margin-bottom: 30px; }
+.cedar-content-heading h2 { max-width: 500px; }
+.cedar-content-heading > p { max-width: 360px; margin: 0 0 3px; color: #6c625e; font-size: 12px; line-height: 1.7; }
+.cedar-offer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.cedar-offer { position: relative; min-height: 270px; overflow: hidden; padding: 31px 34px; }
+.cedar-offer-red { background: #b51e27; color: #fffaf3; }
+.cedar-offer-gold { background: #f0d799; color: #3b3331; }
+.cedar-offer-label { display: block; font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.cedar-offer h3 { position: relative; z-index: 1; margin: 19px 0 10px; font-family: var(--app-font-serif); font-size: 29px; line-height: 1.08; letter-spacing: -.04em; }
+.cedar-offer p { position: relative; z-index: 1; max-width: 330px; margin: 0 0 20px; font-size: 11px; line-height: 1.65; opacity: .88; }
+.cedar-light-link, .cedar-dark-link { position: relative; z-index: 1; }
+.cedar-light-link { color: #fff; }.cedar-dark-link { color: #473c31; }
+.cedar-offer-watermark { position: absolute; right: 24px; bottom: 24px; opacity: .16; transform: rotate(-8deg); }
+.cedar-rate-strip { display: grid; grid-template-columns: .85fr 1.25fr auto; align-items: center; gap: 38px; padding: 35px max(30px, calc((100vw - 1260px) / 2)); background: #f0eae4; border-top: 1px solid #e3d9d2; border-bottom: 1px solid #e3d9d2; }
+.cedar-rate-heading h2 { font-size: 25px; }
+.cedar-rate-message { display: flex; flex-direction: column; gap: 7px; padding-left: 24px; border-left: 2px solid var(--retail-gold); }
+.cedar-rate-message strong { font-size: 12px; }.cedar-rate-message span { max-width: 520px; color: #6f6560; font-size: 10px; line-height: 1.6; }
+.cedar-guidance { display: grid; grid-template-columns: .82fr 1.18fr; gap: clamp(45px, 9vw, 130px); max-width: 1240px; margin: 0 auto; padding: 82px 30px; }
+.cedar-guidance-intro h2 { max-width: 420px; }
+.cedar-guidance-intro > p:not(.cedar-eyebrow) { max-width: 400px; margin: 17px 0 22px; }
+.cedar-guide-list { border-top: 1px solid #e5ddd7; }
+.cedar-guide-list > a { display: flex; min-height: 77px; align-items: center; gap: 14px; border-bottom: 1px solid #e5ddd7; color: var(--retail-brown); text-decoration: none; }
+.cedar-guide-list > a > span:nth-child(2) { flex: 1; }
+.cedar-guide-list strong, .cedar-guide-list small { display: block; }
+.cedar-guide-list strong { font-family: var(--app-font-serif); font-size: 12px; }
+.cedar-guide-list small { margin-top: 5px; color: #7b706b; font-size: 10px; }
+.cedar-guide-list > a > svg { color: var(--retail-red); transition: transform .18s; }.cedar-guide-list > a:hover > svg { transform: translateX(4px); }
+.cedar-guide-icon { display: grid; width: 37px; height: 37px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: #f3e6d8; color: #985633; }
+.cedar-community { display: flex; align-items: center; gap: 25px; padding: 35px max(30px, calc((100vw - 1240px) / 2)); background: #eee4d9; }
+.cedar-community-mark { display: grid; width: 58px; height: 58px; flex: 0 0 auto; place-items: center; border: 1px solid #cdbca9; border-radius: 50%; color: #9b572e; }
+.cedar-community > div:nth-child(2) { flex: 1; }
+.cedar-community h2 { font-size: 25px; }
+.cedar-community > div > p:not(.cedar-eyebrow) { max-width: 640px; margin: 9px 0 0; font-size: 11px; }
+.cedar-about { display: grid; grid-template-columns: 1.2fr .8fr; align-items: center; gap: 60px; max-width: 1240px; margin: 0 auto; padding: 68px 30px; }
+.cedar-about h2 { max-width: 690px; font-size: 27px; }
+.cedar-about-copy > p:not(.cedar-eyebrow) { max-width: 760px; margin: 13px 0 0; font-size: 11px; }
+.cedar-safety-note { display: flex; align-items: center; gap: 14px; padding: 18px; border: 1px solid #e5d3aa; background: #fff8e7; color: #72542e; }
+.cedar-safety-note > svg { flex: 0 0 auto; }
+.cedar-safety-note strong, .cedar-safety-note small { display: block; }
+.cedar-safety-note strong { font-size: 11px; }.cedar-safety-note small { margin-top: 5px; font-size: 10px; line-height: 1.5; }
+.cedar-retail-footer { background: #3b3331; color: #f8f1eb; }
+.cedar-footer-main { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 45px; max-width: 1300px; margin: 0 auto; padding: 50px 30px 43px; }
+.cedar-footer-brand > p { max-width: 260px; margin: 15px 0; color: #d5c8c0; font-size: 10px; line-height: 1.7; }
+.cedar-footer-demo { display: inline-flex; align-items: center; gap: 7px; color: #ffda78; font-size: 9px; font-weight: 700; }
+.cedar-footer-main > div:not(:first-child) { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.cedar-footer-main h3 { margin: 3px 0 6px; color: #ffcf55; font-size: 10px; letter-spacing: .13em; text-transform: uppercase; }
+.cedar-footer-main > div:not(:first-child) a { display: inline-flex; align-items: center; gap: 6px; color: #f4eae3; font-size: 10px; text-decoration: none; }
+.cedar-footer-main a:hover { color: #ffcf55 !important; }
+.cedar-footer-bottom { display: flex; justify-content: space-between; gap: 20px; padding: 17px max(30px, calc((100vw - 1240px) / 2)); border-top: 1px solid rgba(255,255,255,.16); color: #c9bbb3; font-size: 9px; }
+.cedar-footer-bottom p { margin: 0; }
+@media (max-width: 900px) {
+  .cedar-product-scroll { padding: 0 12px; }
+  .cedar-product-scroll a, .cedar-product-scroll button { padding: 0 9px; font-size: 10px; }
+  .cedar-shortcut-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .cedar-shortcut:nth-child(3) { border-left: 1px solid #e4dcd6; }
+  .cedar-shortcut:nth-child(n+3) { border-top: 1px solid #e4dcd6; }
+  .cedar-feature-band { grid-template-columns: .9fr 1.1fr; }
+  .cedar-rate-strip { grid-template-columns: 1fr 1.5fr; gap: 20px; }
+  .cedar-rate-strip > .cedar-text-link { grid-column: 2; }
+  .cedar-guidance { gap: 42px; }
+  .cedar-footer-main { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .cedar-demo-ribbon { font-size: 9px; }
+  .cedar-masthead-inner { height: 69px; padding: 0 17px; }
+  .cedar-brand-mark { width: 38px; height: 38px; font-size: 21px; }
+  .cedar-brand-type strong { font-size: 20px; }
+  .cedar-utility { gap: 6px; }
+  .cedar-utility a:not(:last-child) { display: none; }
+  .cedar-utility a:last-child { max-width: 132px; padding: 9px 10px; font-size: 9px; }
+  .cedar-utility button { display: inline-flex; width: 34px; height: 34px; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,.45); border-radius: 3px; font-size: 0; }
+  .cedar-mobile-menu-trigger { display: grid; width: 37px; height: 37px; flex: 0 0 auto; place-items: center; margin-left: 7px; border: 1px solid rgba(255,255,255,.45); border-radius: 3px; background: transparent; color: white; }
+  .cedar-product-scroll { display: none; min-height: 0; align-items: stretch; flex-direction: column; padding: 0; overflow: visible; }
+  .cedar-product-nav.is-open .cedar-product-scroll { display: flex; }
+  .cedar-product-scroll a, .cedar-product-scroll button { min-height: 45px; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid #eee6df; font-size: 12px; }
+  .cedar-mega-menu { position: static; grid-template-columns: 1fr; gap: 17px; padding: 22px 18px 20px; box-shadow: none; }
+  .cedar-mega-intro h2 { font-size: 21px; }
+  .cedar-mega-links { grid-template-columns: 1fr; gap: 7px; padding-right: 30px; }
+  .cedar-mega-links a { min-height: 47px; padding: 11px; }
+  .cedar-menu-close { top: 12px; right: 13px; }
+  .cedar-search-panel { right: 10px; width: calc(100vw - 20px); padding: 16px; }
+  .cedar-access-inner { min-height: 0; flex-direction: column; align-items: flex-start; gap: 17px; padding: 22px 20px; }
+  .cedar-access-inner h2 { font-size: 22px; }
+  .cedar-access-action { align-items: flex-start; }
+  .cedar-campaign { min-height: 565px; }
+  .cedar-campaign-image { object-position: 63% center; }
+  .cedar-campaign-shade { background: linear-gradient(0deg, rgba(30,25,23,.84) 0%, rgba(30,25,23,.63) 48%, rgba(30,25,23,.03) 100%); }
+  .cedar-campaign-copy { min-height: 565px; justify-content: flex-end; padding: 40px 24px 52px; }
+  .cedar-campaign-copy h1 { max-width: 380px; font-size: 43px; }
+  .cedar-campaign-copy > p:not(.cedar-campaign-kicker) { max-width: 430px; font-size: 13px; }
+  .cedar-campaign-count { right: 20px; bottom: 17px; }
+  .cedar-shortcuts { padding: 34px 18px 38px; }
+  .cedar-shortcut { min-height: 90px; gap: 9px; padding: 12px 10px; }
+  .cedar-shortcut-icon { width: 34px; height: 34px; }
+  .cedar-shortcut-copy strong { font-size: 12px; }
+  .cedar-shortcut-copy small { font-size: 9px; }
+  .cedar-shortcut-arrow { width: 14px; }
+  .cedar-feature-band { grid-template-columns: 1fr; }
+  .cedar-feature-photo { min-height: 225px; }
+  .cedar-feature-copy { padding: 34px 23px 39px; }
+  .cedar-offer-area { padding: 54px 18px; }
+  .cedar-content-heading { display: block; }
+  .cedar-content-heading > p { margin-top: 14px; }
+  .cedar-offer-grid { grid-template-columns: 1fr; gap: 12px; }
+  .cedar-offer { min-height: 245px; padding: 26px 23px; }
+  .cedar-offer h3 { font-size: 27px; }
+  .cedar-rate-strip { grid-template-columns: 1fr; padding: 29px 22px; gap: 17px; }
+  .cedar-rate-strip > .cedar-text-link { grid-column: 1; }
+  .cedar-rate-message { padding-left: 15px; }
+  .cedar-guidance { grid-template-columns: 1fr; gap: 29px; padding: 55px 21px; }
+  .cedar-community { align-items: flex-start; flex-wrap: wrap; padding: 30px 21px; gap: 15px; }
+  .cedar-community-mark { width: 45px; height: 45px; }
+  .cedar-community > div:nth-child(2) { flex-basis: calc(100% - 62px); }
+  .cedar-community > .cedar-red-button { margin-left: 60px; }
+  .cedar-about { grid-template-columns: 1fr; gap: 22px; padding: 52px 21px; }
+  .cedar-footer-main { grid-template-columns: 1fr 1fr; gap: 30px 20px; padding: 38px 21px; }
+  .cedar-footer-brand { grid-column: 1 / -1; }
+  .cedar-footer-bottom { flex-direction: column; padding: 16px 21px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cedar-retail *, .cedar-retail *::before, .cedar-retail *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}

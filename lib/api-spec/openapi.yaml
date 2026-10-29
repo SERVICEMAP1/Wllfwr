@@ -1,0 +1,745 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: demo-banking
+    description: Fictional, isolated demo banking operations
+  - name: enrollment
+    description: Customer enrollment and Admin review
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /enrollment/me:
+    get:
+      operationId: getMyEnrollment
+      tags: [enrollment]
+      summary: Get the signed-in customer's enrollment status
+      responses:
+        "200":
+          description: Current enrollment status and approved account identifiers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerEnrollment"
+        "401":
+          description: Authentication required
+    post:
+      operationId: submitMyEnrollment
+      tags: [enrollment]
+      summary: Submit or update a customer application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerEnrollmentInput"
+      responses:
+        "200":
+          description: Application submitted for Admin review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerEnrollment"
+        "400":
+          description: Invalid application details
+        "401":
+          description: Authentication required
+        "409":
+          description: Application is already approved
+  /enrollment/me/response:
+    post:
+      operationId: submitEnrollmentInfoResponse
+      tags: [enrollment]
+      summary: Respond to an Admin request for more information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnrollmentInfoResponseInput"
+      responses:
+        "200":
+          description: Additional information returned for Admin review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerEnrollment"
+        "400":
+          description: Invalid information response
+        "401":
+          description: Authentication required
+        "409":
+          description: No information request is awaiting a response
+  /admin/enrollments:
+    get:
+      operationId: getAdminEnrollments
+      tags: [enrollment]
+      summary: List customer applications for Admin review
+      responses:
+        "200":
+          description: Customer applications awaiting review or more information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminCustomerEnrollmentList"
+        "401":
+          description: Authentication required
+        "403":
+          description: Admin role required
+  /admin/enrollments/{applicationId}/review:
+    patch:
+      operationId: reviewCustomerEnrollment
+      tags: [enrollment]
+      summary: Approve, reject, or request more information
+      parameters:
+        - in: path
+          name: applicationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerEnrollmentReviewInput"
+      responses:
+        "200":
+          description: Application review saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminCustomerEnrollment"
+        "400":
+          description: Invalid review
+        "401":
+          description: Authentication required
+        "403":
+          description: Admin role required
+        "404":
+          description: Application not found
+        "409":
+          description: Application is no longer awaiting review
+  /demo/overview:
+    get:
+      operationId: getDemoOverview
+      tags: [demo-banking]
+      summary: Get the fictional demo banking overview
+      responses:
+        "200":
+          description: Demo accounts, activity, bills, and cards
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemoOverview"
+        "400":
+          description: Invalid request
+        "401":
+          description: Authentication required
+  /demo/transfers:
+    post:
+      operationId: createDemoTransfer
+      tags: [demo-banking]
+      summary: Simulate a transfer between demo accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DemoTransferInput"
+      responses:
+        "201":
+          description: Simulated transfer recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemoMutation"
+        "400":
+          description: Invalid transfer request
+        "409":
+          description: Transfer exceeds the demo balance or conflicts with an idempotency key
+        "401":
+          description: Authentication required
+  /demo/bill-payments:
+    post:
+      operationId: createDemoBillPayment
+      tags: [demo-banking]
+      summary: Record an internal bill payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DemoBillPaymentInput"
+      responses:
+        "201":
+          description: Bill payment recorded in the internal ledger; not sent to the payee
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemoMutation"
+        "400":
+          description: Invalid payment request
+        "404":
+          description: Demo account not found
+        "409":
+          description: Payment exceeds the demo balance or conflicts with an idempotency key
+        "401":
+          description: Authentication required
+  /demo/deposits/drafts:
+    post:
+      operationId: createDemoDepositDraft
+      tags: [demo-banking]
+      summary: Create a private manual check review draft
+      description: Creates a draft and two short-lived private image upload URLs. This does not deposit or credit funds.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DemoDepositDraftInput"
+      responses:
+        "201":
+          description: Draft created with front and back upload URLs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemoDepositDraftResponse"
+        "400":
+          description: Invalid draft or unsupported image
+        "401":
+          description: Authentication required
+        "404":
+          description: Demo account not found
+  /demo/deposits:
+    get:
+      operationId: getDemoDeposits
+      tags: [demo-banking]
+      summary: List the signed-in customer's manual review submissions
+      responses:
+        "200":
+          description: The signed-in customer's deposit submissions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemoDepositList"
+        "401":
+          description: Authentication required
+  /demo/deposits/{depositId}/submit:
+    post:
+      operationId: submitDemoDeposit
+      tags: [demo-banking]
+      summary: Submit both check images for manual review
+      parameters:
+        - in: path
+          name: depositId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Submission queued for manual review; no funds are credited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemoDepositSummary"
+        "400":
+          description: One or both uploaded images are missing or invalid
+        "401":
+          description: Authentication required
+        "404":
+          description: Draft not found
+        "409":
+          description: Draft is not in a submit-ready state
+  /demo/deposits/{depositId}/images/{side}:
+    get:
+      operationId: getDemoDepositImage
+      tags: [demo-banking]
+      summary: View a check image when authorized as owner or admin
+      parameters:
+        - in: path
+          name: depositId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: side
+          required: true
+          schema:
+            type: string
+            enum: [front, back]
+      responses:
+        "200":
+          description: Private check image
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+        "401":
+          description: Authentication required
+        "403":
+          description: Not authorized to view this image
+        "404":
+          description: Deposit or image not found
+  /demo/deposits/{depositId}:
+    delete:
+      operationId: deleteDemoDeposit
+      tags: [demo-banking]
+      summary: Permanently delete a customer's submission and check images
+      parameters:
+        - in: path
+          name: depositId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Submission and private images deleted
+        "401":
+          description: Authentication required
+        "404":
+          description: Deposit not found
+  /demo/admin/deposits:
+    get:
+      operationId: getAdminDemoDeposits
+      tags: [demo-banking]
+      summary: List submissions awaiting admin review
+      responses:
+        "200":
+          description: Pending manual review items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDemoDepositList"
+        "401":
+          description: Authentication required
+        "403":
+          description: Admin role required
+  /demo/admin/deposits/{depositId}/review:
+    patch:
+      operationId: reviewDemoDeposit
+      tags: [demo-banking]
+      summary: Mark a check submission reviewed or rejected
+      parameters:
+        - in: path
+          name: depositId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DemoDepositReviewInput"
+      responses:
+        "200":
+          description: Review status saved; no funds are credited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemoDepositSummary"
+        "400":
+          description: Invalid review decision
+        "401":
+          description: Authentication required
+        "403":
+          description: Admin role required
+        "404":
+          description: Deposit not found
+        "409":
+          description: Deposit is no longer awaiting review
+  /demo/cards/{cardId}:
+    patch:
+      operationId: updateDemoCard
+      tags: [demo-banking]
+      summary: Freeze or unfreeze a demo card
+      parameters:
+        - in: path
+          name: cardId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DemoCardUpdate"
+      responses:
+        "200":
+          description: Updated demo card status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemoCard"
+        "404":
+          description: Demo card not found
+        "400":
+          description: Invalid demo card update
+        "401":
+          description: Authentication required
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    DemoAccount:
+      type: object
+      required: [id, name, kind, maskedNumber, currency, balanceCents, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        kind:
+          type: string
+          enum: [checking, savings]
+        maskedNumber:
+          type: string
+        currency:
+          type: string
+        balanceCents:
+          type: integer
+        status:
+          type: string
+    DemoActivity:
+      type: object
+      required: [id, name, date, account, amountCents, category, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        date:
+          type: string
+          format: date-time
+        account:
+          type: string
+        amountCents:
+          type: integer
+        category:
+          type: string
+        status:
+          type: string
+    DemoBill:
+      type: object
+      required: [id, payee, dueDate, amountCents, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        payee:
+          type: string
+        dueDate:
+          type: string
+          format: date
+        amountCents:
+          type: integer
+        status:
+          type: string
+          enum: [scheduled, paid]
+    DemoCard:
+      type: object
+      required: [id, name, lastFour, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        lastFour:
+          type: string
+        status:
+          type: string
+          enum: [active, frozen]
+    DemoOverview:
+      type: object
+      required: [accounts, activity, bills, cards]
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/DemoAccount"
+        activity:
+          type: array
+          items:
+            $ref: "#/components/schemas/DemoActivity"
+        bills:
+          type: array
+          items:
+            $ref: "#/components/schemas/DemoBill"
+        cards:
+          type: array
+          items:
+            $ref: "#/components/schemas/DemoCard"
+    DemoTransferInput:
+      type: object
+      required: [fromAccountId, toAccountId, amountCents, idempotencyKey]
+      properties:
+        fromAccountId:
+          type: string
+          format: uuid
+        toAccountId:
+          type: string
+          format: uuid
+        amountCents:
+          type: integer
+          minimum: 1
+        idempotencyKey:
+          type: string
+          minLength: 8
+          maxLength: 100
+    DemoBillPaymentInput:
+      type: object
+      required: [accountId, payee, amountCents, idempotencyKey]
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        payee:
+          type: string
+          minLength: 1
+          maxLength: 120
+        amountCents:
+          type: integer
+          minimum: 1
+        idempotencyKey:
+          type: string
+          minLength: 8
+          maxLength: 100
+    DemoCardUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [active, frozen]
+    DemoMutation:
+      type: object
+      required: [transactionId, status]
+      properties:
+        transactionId:
+          type: string
+          format: uuid
+        status:
+          type: string
+    CustomerEnrollment:
+      type: object
+      required: [status, accountType]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [not_started, pending_review, needs_info, approved, rejected]
+        fullName:
+          type: string
+        phone:
+          type: string
+        homeAddress:
+          type: string
+        accountType:
+          type: string
+          enum: [personal, business]
+        infoRequest:
+          type: string
+        applicantResponse:
+          type: string
+        customerId:
+          type: string
+        accountNumber:
+          type: string
+        submittedAt:
+          type: string
+          format: date-time
+        reviewedAt:
+          type: string
+          format: date-time
+    AdminCustomerEnrollment:
+      allOf:
+        - $ref: "#/components/schemas/CustomerEnrollment"
+        - type: object
+          required: [ownerUserId]
+          properties:
+            ownerUserId:
+              type: string
+    AdminCustomerEnrollmentList:
+      type: array
+      items:
+        $ref: "#/components/schemas/AdminCustomerEnrollment"
+    CustomerEnrollmentInput:
+      type: object
+      required: [fullName, phone, homeAddress, accountType]
+      properties:
+        fullName:
+          type: string
+          minLength: 2
+          maxLength: 100
+        phone:
+          type: string
+          minLength: 7
+          maxLength: 30
+        homeAddress:
+          type: string
+          minLength: 5
+          maxLength: 500
+        accountType:
+          type: string
+          enum: [personal, business]
+    EnrollmentInfoResponseInput:
+      type: object
+      required: [response]
+      properties:
+        response:
+          type: string
+          minLength: 3
+          maxLength: 1200
+    CustomerEnrollmentReviewInput:
+      type: object
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          enum: [approve, request_info, reject]
+        note:
+          type: string
+          maxLength: 1200
+    DemoDepositUpload:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL:
+          type: string
+          format: uri
+        objectPath:
+          type: string
+    DemoDepositDraftInput:
+      type: object
+      required: [accountId, amountCents, frontContentType, frontSize, backContentType, backSize]
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        amountCents:
+          type: integer
+          minimum: 1
+        frontContentType:
+          type: string
+          enum: [image/jpeg, image/png, image/webp]
+        frontSize:
+          type: integer
+          minimum: 1
+          maximum: 10485760
+        backContentType:
+          type: string
+          enum: [image/jpeg, image/png, image/webp]
+        backSize:
+          type: integer
+          minimum: 1
+          maximum: 10485760
+    DemoDepositDraftResponse:
+      type: object
+      required: [depositId, front, back]
+      properties:
+        depositId:
+          type: string
+          format: uuid
+        front:
+          $ref: "#/components/schemas/DemoDepositUpload"
+        back:
+          $ref: "#/components/schemas/DemoDepositUpload"
+    DemoDepositSummary:
+      type: object
+      required: [id, accountName, amountCents, status, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        accountName:
+          type: string
+        amountCents:
+          type: integer
+        status:
+          type: string
+          enum: [draft, pending_review, reviewed, posted, rejected]
+        createdAt:
+          type: string
+          format: date-time
+        submittedAt:
+          type: string
+          format: date-time
+        reviewedAt:
+          type: string
+          format: date-time
+        reviewNote:
+          type: string
+    DemoDepositList:
+      type: array
+      items:
+        $ref: "#/components/schemas/DemoDepositSummary"
+    AdminDemoDepositSummary:
+      allOf:
+        - $ref: "#/components/schemas/DemoDepositSummary"
+        - type: object
+          required: [customerId]
+          properties:
+            customerId:
+              type: string
+              description: Clerk user ID of the customer.
+    AdminDemoDepositList:
+      type: array
+      items:
+        $ref: "#/components/schemas/AdminDemoDepositSummary"
+    DemoDepositReviewInput:
+      type: object
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          enum: [posted, rejected]
+        note:
+          type: string
+          maxLength: 400
+
